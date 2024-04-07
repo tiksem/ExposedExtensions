@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'java-library'
-    id 'org.jetbrains.kotlin.jvm' version '1.7.20'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.10'
 }
 
 def exposed_version = project.getProperty('exposed_version')
@@ -12,7 +12,7 @@ repositories {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(18))
 }
 
 dependencies {
@@ -24,14 +24,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
 }
