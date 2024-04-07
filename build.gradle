@@ -12,12 +12,12 @@ repositories {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(18))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
 dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version+")
-    implementation("com.github.tiksem:KotlinUtils:1.0.1+")
+    implementation("com.github.tiksem:KotlinUtils:1.0.3+")
     implementation("com.github.tiksem:KotlinSpirit:1.1.9+")
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version+")
 }
