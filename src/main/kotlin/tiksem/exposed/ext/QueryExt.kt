@@ -29,7 +29,7 @@ fun <Id : Comparable<Id>> paginationWhere(
     return (dateColumn less dateSeek) or ((dateColumn eq dateSeek) and (idColumn less idSeek))
 }
 
-fun <Id : Comparable<Id>> ColumnSet.createPaginationSelect(
+fun <Id : Comparable<Id>> FieldSet.createPaginationSelect(
     dateColumn: Column<Long>,
     idColumn: Column<Id>,
     dateSeek: Long?,
