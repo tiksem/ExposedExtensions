@@ -2,6 +2,7 @@ package tiksem.exposed.ext
 
 import com.kotlinspirit.core.Rule
 import com.kotlinspirit.core.Rules.char
+import com.kotlinspirit.ext.replaceAll
 import com.kotlinspirit.grammar.Grammar
 import org.intellij.lang.annotations.Language
 import org.jetbrains.exposed.sql.*
@@ -84,9 +85,17 @@ object SqlUtils {
         val conn = TransactionManager.current().connection
         val statement = conn.prepareStatement(sql, false)
 
+        val exposedArgs = args.toExposedArgs().toList()
         statement.fillParameters(
-            args.toExposedArgs()
+            exposedArgs
         )
+
+        var index = 0
+        val sqlForLogging = sql.replaceAll(char('?'), replacementProvider = {
+            val arg = exposedArgs[index++]
+            arg.first.valueToString(arg.second)
+        })
+        exposedLogger.debug("getStatement created with sql: $sqlForLogging")
 
         return statement
     }
