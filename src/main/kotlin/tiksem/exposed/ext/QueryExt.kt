@@ -29,6 +29,46 @@ fun <Id : Comparable<Id>> paginationWhere(
     return (dateColumn less dateSeek) or ((dateColumn eq dateSeek) and (idColumn less idSeek))
 }
 
+class OrderItem<T : Comparable<T>>(
+    val column: Column<T>,
+    val seek: T
+)
+
+fun <T : Comparable<T>> paginationWhere(
+    items: List<OrderItem<T>>
+): Op<Boolean> {
+    fun allEqualWhere(firstIndexInclusive: Int, lastIndexExclusive: Int): Op<Boolean> {
+        var result: Op<Boolean>? = null
+        for (item in items.subList(firstIndexInclusive, lastIndexExclusive)) {
+            val eqOp = item.column eq item.seek
+            result = if (result == null) {
+                eqOp
+            } else {
+                result!! and eqOp
+            }
+        }
+
+        return result ?: Op.TRUE
+    }
+
+    var i = 0
+    var result: Op<Boolean>? = null
+    while (i < items.size) {
+        val item = items[i]
+        val lessOp = item.column less item.seek
+        if (result == null) {
+            result = lessOp
+        } else {
+            val eqOp = allEqualWhere(0, i)
+            result = result!! or (eqOp and lessOp)
+        }
+
+        ++i
+    }
+
+    return result ?: Op.TRUE
+}
+
 fun <Id : Comparable<Id>> FieldSet.createPaginationSelect(
     dateColumn: Column<Long>,
     idColumn: Column<Id>,
