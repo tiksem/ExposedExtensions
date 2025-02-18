@@ -60,6 +60,6 @@ fun <E : Enum<E>> Table.mysqlSet(name: String, enumClass: Class<E>): Column<Long
     return registerColumn(name, MysqlSetColumnType(enumClass))
 }
 
-fun tinyblob(name: String): Column<ExposedBlob> = registerColumn(name, TinyBlobColumnType())
-fun mediumblob(name: String): Column<ExposedBlob> = registerColumn(name, MediumBlobColumnType())
-fun longblob(name: String): Column<ExposedBlob> = registerColumn(name, LongBlobColumnType())
+fun Table.tinyblob(name: String): Column<ExposedBlob> = registerColumn(name, TinyBlobColumnType())
+fun Table.mediumblob(name: String): Column<ExposedBlob> = registerColumn(name, MediumBlobColumnType())
+fun Table.longblob(name: String): Column<ExposedBlob> = registerColumn(name, LongBlobColumnType())
