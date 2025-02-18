@@ -30,6 +30,9 @@ class MysqlSetColumnType<E : Enum<E>>(private val enumClass: Class<E>) : ColumnT
     }
 
     override fun valueFromDB(value: Any): Any {
+        if (value is LongEnumBitSet<*>) {
+            return value
+        }
         if (value is String) {
             val setValues = value.split(",").map { it.trim() }
             val bitSet = LongEnumBitSet(enumClass)
