@@ -55,8 +55,8 @@ object SqlUtils {
         return getStatement(newSql, argsList)
     }
 
-    private fun <T: Any> List<T>.toExposedArgs(): Iterable<Pair<IColumnType, Any?>> {
-        fun Any.toType(): IColumnType {
+    private fun <T: Any> List<T>.toExposedArgs(): Iterable<Pair<IColumnType<*>, Any?>> {
+        fun Any.toType(): IColumnType<*> {
             return when(this) {
                 is Int -> IntegerColumnType()
                 is Long -> LongColumnType()
@@ -93,7 +93,7 @@ object SqlUtils {
         var index = 0
         val sqlForLogging = sql.replaceAll(char('?'), replacementProvider = {
             val arg = exposedArgs[index++]
-            arg.first.valueToString(arg.second)
+            arg.first.valueToString(arg.second as Nothing?)
         })
         exposedLogger.debug("getStatement created with sql: $sqlForLogging")
 

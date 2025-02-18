@@ -6,7 +6,7 @@ import tiksem.ext.bitset.LongEnumBitSet
 import tiksem.ext.strings.quote
 import tiksem.ext.strings.unquote
 
-class MysqlSetColumnType<E : Enum<E>>(private val enumClass: Class<E>) : ColumnType() {
+class MysqlSetColumnType<E : Enum<E>>(private val enumClass: Class<E>) : ColumnType<LongEnumBitSet<E>>() {
     private val enumConstants: Array<E> = enumClass.enumConstants ?: throw IllegalArgumentException("Class must be an enum type")
 
     init {
@@ -29,9 +29,9 @@ class MysqlSetColumnType<E : Enum<E>>(private val enumClass: Class<E>) : ColumnT
         }
     }
 
-    override fun valueFromDB(value: Any): Any {
+    override fun valueFromDB(value: Any): LongEnumBitSet<E> {
         if (value is LongEnumBitSet<*>) {
-            return value
+            return value as LongEnumBitSet<E>
         }
         if (value is String) {
             val setValues = value.split(",").map { it.trim() }
@@ -44,10 +44,7 @@ class MysqlSetColumnType<E : Enum<E>>(private val enumClass: Class<E>) : ColumnT
         throw IllegalArgumentException("Unexpected value type: ${value::class.qualifiedName}")
     }
 
-    override fun notNullValueToDB(value: Any): Any {
-        if (value is LongEnumBitSet<*>) {
-            return value.toString().quote('\'')
-        }
-        throw IllegalArgumentException("Unexpected value type: ${value::class.qualifiedName}")
+    override fun notNullValueToDB(value: LongEnumBitSet<E>): Any {
+        return value.toString().quote('\'')
     }
 }

@@ -5,17 +5,10 @@ import org.jetbrains.exposed.sql.IColumnType
 import org.jetbrains.exposed.sql.statements.api.PreparedStatementApi
 import java.sql.ResultSet
 
-class GeneratedColumnType(
-    private val subType: IColumnType,
+class GeneratedColumnType<T>(
+    private val subType: IColumnType<T>,
     private val function: String
-) : ColumnType() {
-    override fun nonNullValueToString(value: Any): String {
-        return subType.nonNullValueToString(value)
-    }
-
-    override fun notNullValueToDB(value: Any): Any {
-        return subType.notNullValueToDB(value)
-    }
+) : ColumnType<T>() {
 
     override fun readObject(rs: ResultSet, index: Int): Any? {
         return subType.readObject(rs, index)
@@ -25,23 +18,31 @@ class GeneratedColumnType(
         subType.setParameter(stmt, index, value)
     }
 
-    override fun validateValueBeforeUpdate(value: Any?) {
-        throw IllegalArgumentException("Update is not supported for generated columns")
+    override fun sqlType(): String {
+        return "${subType.sqlType()} generated always as ($function)"
     }
 
-    override fun valueFromDB(value: Any): Any {
+    override fun valueFromDB(value: Any): T? {
         return subType.valueFromDB(value)
     }
 
-    override fun valueToDB(value: Any?): Any? {
+    override fun parameterMarker(value: T?): String {
+        return subType.parameterMarker(value)
+    }
+
+    override fun validateValueBeforeUpdate(value: T?) {
+        subType.validateValueBeforeUpdate(value)
+    }
+
+    override fun valueAsDefaultString(value: T?): String {
+        return subType.valueAsDefaultString(value)
+    }
+
+    override fun valueToDB(value: T?): Any? {
         return subType.valueToDB(value)
     }
 
-    override fun valueToString(value: Any?): String {
+    override fun valueToString(value: T?): String {
         return subType.valueToString(value)
-    }
-
-    override fun sqlType(): String {
-        return "${subType.sqlType()} generated always as ($function)"
     }
 }

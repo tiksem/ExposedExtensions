@@ -34,13 +34,13 @@ inline fun <reified T : Enum<T>> Table.mysqlEnum(name: String): Column<T> {
     )
 }
 
-inline fun <reified T> Table.generated(column: Column<T>, function: String): Column<T> {
+inline fun <reified T : Any> Table.generated(column: Column<T>, function: String): Column<T> {
     return replaceColumn(
         oldColumn = column,
         newColumn = Column(
             table = this,
             name = column.name,
-            columnType = GeneratedColumnType(
+            columnType = GeneratedColumnType<T>(
                 subType = column.columnType,
                 function = function
             )
@@ -57,7 +57,7 @@ fun Table.textJson(name: String): Column<String> {
 }
 
 fun <E : Enum<E>> Table.mysqlSet(name: String, enumClass: Class<E>): Column<LongEnumBitSet<E>> {
-    return registerColumn(name, MysqlSetColumnType(enumClass))
+    return registerColumn(name, MysqlSetColumnType<E>(enumClass))
 }
 
 fun Table.tinyblob(name: String): Column<ExposedBlob> = registerColumn(name, TinyBlobColumnType())
