@@ -7,42 +7,36 @@ import java.sql.ResultSet
 
 class GeneratedColumnType<T>(
     private val subType: IColumnType<T>,
-    private val function: String
+    private val function: String,
+    private val stored: Boolean = true,
+    // carry-through the underlying nullability
+    override var nullable: Boolean = (subType as? ColumnType<T>)?.nullable ?: true
 ) : ColumnType<T>() {
 
-    override fun readObject(rs: ResultSet, index: Int): Any? {
-        return subType.readObject(rs, index)
-    }
-
-    override fun setParameter(stmt: PreparedStatementApi, index: Int, value: Any?) {
-        subType.setParameter(stmt, index, value)
-    }
-
     override fun sqlType(): String {
-        return "${subType.sqlType()} generated always as ($function)"
+        // MySQL/MariaDB: "GENERATED ALWAYS AS (...) STORED|VIRTUAL"
+        // (Exposed adds NULL/NOT NULL outside of sqlType)
+        val storage = if (stored) "STORED" else "VIRTUAL"
+        return "${subType.sqlType()} GENERATED ALWAYS AS ($function) $storage"
     }
 
-    override fun valueFromDB(value: Any): T? {
-        return subType.valueFromDB(value)
-    }
+    // ---- Reads delegate to the underlying type ----
+    override fun readObject(rs: ResultSet, index: Int): Any? = subType.readObject(rs, index)
+    override fun valueFromDB(value: Any): T? = subType.valueFromDB(value)
+    override fun parameterMarker(value: T?): String = subType.parameterMarker(value)
+    override fun valueAsDefaultString(value: T?): String = subType.valueAsDefaultString(value)
+    override fun valueToString(value: T?): String = subType.valueToString(value)
 
-    override fun parameterMarker(value: T?): String {
-        return subType.parameterMarker(value)
-    }
-
-    override fun validateValueBeforeUpdate(value: T?) {
-        subType.validateValueBeforeUpdate(value)
-    }
-
-    override fun valueAsDefaultString(value: T?): String {
-        return subType.valueAsDefaultString(value)
+    // ---- Writes: either delegate or block (recommended to block) ----
+    // If you prefer to *allow* writes (DB will ignore/compute), keep delegating setParameter/valueToDB.
+    // To fail fast on accidental writes, throw:
+    override fun setParameter(stmt: PreparedStatementApi, index: Int, value: Any?) {
+        // Prevent inserting/updating a generated column
+        throw UnsupportedOperationException("Cannot set value for a generated column")
     }
 
     override fun valueToDB(value: T?): Any? {
-        return subType.valueToDB(value)
-    }
-
-    override fun valueToString(value: T?): String {
-        return subType.valueToString(value)
+        // Prevent inserting/updating a generated column
+        throw UnsupportedOperationException("Cannot write value for a generated column")
     }
 }

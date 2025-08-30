@@ -17,7 +17,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'tiksem.exposed.ext'
             artifactId = 'release'
-            version = "1.0.7"
+            version = "1.1.5"
             from components.java
 
             pom {

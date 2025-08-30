@@ -34,19 +34,23 @@ inline fun <reified T : Enum<T>> Table.mysqlEnum(name: String): Column<T> {
     )
 }
 
-inline fun <reified T : Any> Table.generated(column: Column<T>, function: String): Column<T> {
-    return replaceColumn(
-        oldColumn = column,
-        newColumn = Column(
-            table = this,
-            name = column.name,
-            columnType = GeneratedColumnType<T>(
-                subType = column.columnType,
-                function = function
-            )
+inline fun <reified T> Table.generated(
+    column: Column<T>,
+    function: String,
+    stored: Boolean = true
+): Column<T> = replaceColumn(
+    oldColumn = column,
+    newColumn = Column(
+        table = this,
+        name = column.name,
+        columnType = GeneratedColumnType(
+            subType = column.columnType,
+            function = function,
+            stored = stored,
+            // nullable is taken from subType by default
         )
     )
-}
+)
 
 fun Table.sqlQuery(@Language("SQL") sql: String): List<ResultRow> {
     return SqlUtils.executeSqlQuery(sql = sql).toResultRowList(columns)
